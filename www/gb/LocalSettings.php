@@ -133,3 +133,32 @@ $wgUseRCPatrol = false;
 $wgLocaltimezone = "Asia/Tokyo";
 $oldtz = getenv("TZ");
 putenv("TZ=$wgLocaltimezone");
+
+// Lock down wiki so that only forum users can do anything
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['*']['createaccount'] = false;
+$wgDisableAnonTalk = false;
+$wgShowIPinHeader = false;
+
+
+// PHPBB User Database Plugin. (Requires MySQL Database)
+require_once './extensions/Auth_phpbb.php';
+
+$wgPHPBB_WikiGroupName  = 'Mie AJET';           // Name of your PHPBB group
+                                                // users need to be a member
+                                                // of to use the wiki. (i.e. wiki)
+
+$wgPHPBB_UseWikiGroup   = false;                // This tells the Plugin to require
+                                                // a user to be a member of the above
+                                                // phpBB group. (ie. wiki) Setting
+                                                // this to false will let any phpBB
+                                                // user edit the wiki.
+
+$wgPHPBB_UseExtDatabase = false;                // This tells the plugin that the phpBB tables
+                                                // are in a different database then the wiki.
+                                                // The default settings is false.
+
+$wgPHPBB_UserTB         = 'phpbb_users';        // Name of your PHPBB user table. (i.e. phpbb_users)
+$wgPHPBB_GroupsTB       = 'phpbb_groups';       // Name of your PHPBB groups table. (i.e. phpbb_groups)
+$wgPHPBB_User_GroupTB   = 'phpbb_user_group';   // Name of your PHPBB user_group table. (i.e. phpbb_user_group)
+$wgAuth                 = new Auth_PHPBB();     // Auth_PHPBB Plugin.
