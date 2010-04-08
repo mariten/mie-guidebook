@@ -134,6 +134,10 @@ $wgLocaltimezone = "Asia/Tokyo";
 $oldtz = getenv("TZ");
 putenv("TZ=$wgLocaltimezone");
 
+// EditTools
+require_once("$IP/extensions/CharInsert.php");
+
+
 // Lock down wiki so that only forum users can do anything
 $wgGroupPermissions['*']['edit'] = false;
 $wgGroupPermissions['*']['createaccount'] = false;
