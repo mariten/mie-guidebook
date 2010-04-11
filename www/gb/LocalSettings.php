@@ -137,6 +137,9 @@ putenv("TZ=$wgLocaltimezone");
 // EditTools
 require_once("$IP/extensions/CharInsert.php");
 
+// ImageMap
+require_once("$IP/extensions/ImageMap/ImageMap.php");
+
 
 // Lock down wiki so that only forum users can do anything
 $wgGroupPermissions['*']['edit'] = false;
