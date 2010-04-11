@@ -140,6 +140,9 @@ require_once("$IP/extensions/CharInsert.php");
 // ImageMap
 require_once("$IP/extensions/ImageMap/ImageMap.php");
 
+// NoTitle
+require_once("$IP/extensions/notitle.php");
+
 
 // Lock down wiki so that only forum users can do anything
 $wgGroupPermissions['*']['edit'] = false;
