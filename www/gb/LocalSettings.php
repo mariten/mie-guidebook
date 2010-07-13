@@ -36,7 +36,7 @@ if ( $wgCommandLineMode ) {
 # $wgDisableOutputCompression = true;
 
 $wgSitename         = "Mie Guidebook";
-$wgLogo             = 'http://www.miejets.org/gb/miekanji.png';
+$wgLogo             = 'http://www.miejets.org/gb/logo.png';
 
 ## The URL base path to the directory containing the wiki;
 ## defaults for all runtime URL paths are based off of this.
