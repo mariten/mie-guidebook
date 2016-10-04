@@ -36,7 +36,7 @@ if ( $wgCommandLineMode ) {
 # $wgDisableOutputCompression = true;
 
 $wgSitename         = "Mie Guidebook";
-$wgLogo             = 'http://www.miejets.org/gb/logo.png';
+$wgLogo             = 'http://www.miejets.org/gb/miekanji.png';
 
 ## The URL base path to the directory containing the wiki;
 ## defaults for all runtime URL paths are based off of this.
@@ -50,8 +50,8 @@ $wgScriptExtension  = ".php";
 $wgEnableEmail      = false;
 $wgEnableUserEmail  = false; # UPO
 
-$wgEmergencyContact = "forum@miejets.org";
-$wgPasswordSender = "forum@miejets.org";
+$wgEmergencyContact = "info@mieguidebook.org";
+$wgPasswordSender = "info@mieguidebook.org";
 
 $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
