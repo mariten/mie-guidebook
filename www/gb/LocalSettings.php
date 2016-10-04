@@ -45,6 +45,10 @@ $wgLogo             = 'http://www.miejets.org/gb/miekanji.png';
 $wgScriptPath       = "/gb";
 $wgScriptExtension  = ".php";
 
+// Use Clean URLs
+$wgUsePathInfo      = true;
+$wgArticlePath      = '/wiki/$1';
+
 ## UPO means: this is also a user preference option
 
 $wgEnableEmail      = false;

@@ -1,0 +1,7 @@
+RewriteEngine On
+
+# Pretty URL for Guidebook articles
+RewriteRule ^/?wiki(/.*)?$ %{DOCUMENT_ROOT}/gb/index.php [L]
+
+# Redirect empty path to Main Page
+RewriteRule ^/*$ %{DOCUMENT_ROOT}/gb/index.php [L]
