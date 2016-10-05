@@ -145,7 +145,7 @@ putenv("TZ=$wgLocaltimezone");
 //require_once("$IP/extensions/CharInsert.php");
 
 // ImageMap
-//require_once("$IP/extensions/ImageMap/ImageMap.php");
+require_once("$IP/extensions/ImageMap/ImageMap.php");
 
 // NoTitle
 //require_once("$IP/extensions/notitle.php");

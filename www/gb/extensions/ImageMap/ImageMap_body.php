@@ -1,7 +1,9 @@
 <?php
-
 /**
- * Image map extension. 
+ * Main file for extension ImageMap.
+ *
+ * @file
+ * @ingroup Extensions
  *
  * Syntax:
  * <imagemap>
@@ -9,7 +11,7 @@
  *
  * rect    0  0  50 50  [[Foo type A]]
  * circle  50 50 20     [[Foo type B]]
- * 
+ *
  * desc bottom-left
  * </imagemap>
  *
@@ -26,9 +28,23 @@ class ImageMap {
 	const TOP_LEFT = 3;
 	const NONE = 4;
 
-	static function render( $input, $params, $parser ) {
-		global $wgScriptPath, $wgUser, $wgUrlProtocols, $wgNoFollowLinks;
-		wfLoadExtensionMessages( 'ImageMap' );
+	/**
+	 * @param Parser $parser
+	 * @return bool
+	 */
+	public static function onParserFirstCallInit( Parser &$parser ) {
+		$parser->setHook( 'imagemap', array( 'ImageMap', 'render' ) );
+		return true;
+	}
+
+	/**
+	 * @param $input
+	 * @param $params
+	 * @param $parser Parser
+	 * @return array|mixed|string
+	 */
+	public static function render( $input, $params, $parser ) {
+		global $wgExtensionAssetsPath, $wgUrlProtocols, $wgNoFollowLinks;
 
 		$lines = explode( "\n", $input );
 
@@ -42,6 +58,7 @@ class ImageMap {
 		$descType = self::BOTTOM_RIGHT;
 		$defaultLinkAttribs = false;
 		$realmap = true;
+		$extLinks = array();
 		foreach ( $lines as $line ) {
 			++$lineNum;
 			$externLink = false;
@@ -67,7 +84,7 @@ class ImageMap {
 				if ( !$imageTitle || $imageTitle->getNamespace() != NS_IMAGE ) {
 					return self::error( 'imagemap_no_image' );
 				}
-				if ( wfIsBadImage( $imageTitle->getDBkey() , $parser->mTitle ) ) {
+				if ( wfIsBadImage( $imageTitle->getDBkey(), $parser->mTitle ) ) {
 					return self::error( 'imagemap_bad_image' );
 				}
 				// Parse the options so we can use links and the like in the caption
@@ -76,7 +93,6 @@ class ImageMap {
 				$parser->replaceLinkHolders( $imageHTML );
 				$imageHTML = $parser->mStripState->unstripBoth( $imageHTML );
 				$imageHTML = Sanitizer::normalizeCharReferences( $imageHTML );
-				$parser->mOutput->addImage( $imageTitle->getDBkey() );
 
 				$domDoc = new DOMDocument();
 				wfSuppressWarnings();
@@ -90,20 +106,15 @@ class ImageMap {
 				if ( !$imgs->length ) {
 					return self::error( 'imagemap_invalid_image' );
 				}
-				$imageNode = $imgs->item(0);
-				$thumbWidth = $imageNode->getAttribute('width');
-				$thumbHeight = $imageNode->getAttribute('height');
+				$imageNode = $imgs->item( 0 );
+				$thumbWidth = $imageNode->getAttribute( 'width' );
+				$thumbHeight = $imageNode->getAttribute( 'height' );
 
-				if( function_exists( 'wfFindFile' ) ) {
-					$imageObj = wfFindFile( $imageTitle );
-				} else {
-					// Old MW
-					$imageObj = wfFindFile( $imageTitle );
-				}
+				$imageObj = wfFindFile( $imageTitle );
 				if ( !$imageObj || !$imageObj->exists() ) {
 					return self::error( 'imagemap_invalid_image' );
 				}
-				# Add the linear dimensions to avoid inaccuracy in the scale 
+				# Add the linear dimensions to avoid inaccuracy in the scale
 				# factor when one is much larger than the other
 				# (sx+sy)/(x+y) = s
 				$denominator = $imageObj->getWidth() + $imageObj->getHeight();
@@ -118,7 +129,7 @@ class ImageMap {
 			# Handle desc spec
 			$cmd = strtok( $line, " \t" );
 			if ( $cmd == 'desc' ) {
-				$typesText = wfMsgForContent( 'imagemap_desc_types' );
+				$typesText = wfMessage( 'imagemap_desc_types' )->inContentLanguage()->text();
 				if ( $descTypesCanonical != $typesText ) {
 					// i18n desc types exists
 					$typesText = $descTypesCanonical . ', ' . $typesText;
@@ -138,15 +149,17 @@ class ImageMap {
 
 			# Find the link
 			$link = trim( strstr( $line, '[' ) );
+			$m = array();
 			if ( preg_match( '/^ \[\[  ([^|]*+)  \|  ([^\]]*+)  \]\] \w* $ /x', $link, $m ) ) {
 				$title = Title::newFromText( $m[1] );
 				$alt = trim( $m[2] );
 			} elseif ( preg_match( '/^ \[\[  ([^\]]*+) \]\] \w* $ /x', $link, $m ) ) {
 				$title = Title::newFromText( $m[1] );
-				if (is_null($title))
-					return self::error('imagemap_invalid_title', $lineNum);
+				if ( is_null( $title ) ) {
+					return self::error( 'imagemap_invalid_title', $lineNum );
+				}
 				$alt = $title->getFullText();
-			} elseif ( in_array( substr( $link , 1 , strpos($link, '//' )+1 ) , $wgUrlProtocols ) || in_array( substr( $link , 1 , strpos($link, ':' ) ) , $wgUrlProtocols ) ) {
+			} elseif ( in_array( substr( $link, 1, strpos( $link, '//' ) + 1 ), $wgUrlProtocols ) || in_array( substr( $link, 1, strpos( $link, ':' ) ), $wgUrlProtocols ) ) {
 				if ( preg_match( '/^ \[  ([^\s]*+)  \s  ([^\]]*+)  \] \w* $ /x', $link, $m ) ) {
 					$title = $m[1];
 					$alt = trim( $m[2] );
@@ -213,12 +226,12 @@ class ImageMap {
 				if ( $wgNoFollowLinks ) {
 					$attribs['rel'] = 'nofollow';
 				}
-			} else if ( $title->getFragment() != '' && $title->getPrefixedDBkey() == '' ) {
+			} elseif ( $title->getFragment() != '' && $title->getPrefixedDBkey() == '' ) {
 				# XXX: kluge to handle [[#Fragment]] links, should really fix getLocalURL()
 				# in Title.php to return an empty string in this case
 				$attribs['href'] = $title->getFragmentForURL();
 			} else {
-				$attribs['href'] = $title->escapeLocalURL() . $title->getFragmentForURL();
+				$attribs['href'] = $title->getLocalURL() . $title->getFragmentForURL();
 			}
 			if ( $shape != 'default' ) {
 				$attribs['shape'] = $shape;
@@ -231,7 +244,7 @@ class ImageMap {
 					$attribs['alt'] = $alt;
 				}
 				$attribs['title'] = $alt;
-			} 
+			}
 			if ( $shape == 'default' ) {
 				$defaultLinkAttribs = $attribs;
 			} else {
@@ -248,16 +261,14 @@ class ImageMap {
 			return self::error( 'imagemap_no_image' );
 		}
 
-		if ( $mapHTML == '' && $defaultLinkAttribs == '' ) {
-			return self::error( 'imagemap_no_areas' );
-		} elseif ( $mapHTML == '' && $defaultLinkAttribs != '' ) {
+		if ( $mapHTML == '' ) {
 			// no areas defined, default only. It's not a real imagemap, so we do not need some tags
 			$realmap = false;
 		}
 
 		if ( $realmap ) {
 			# Construct the map
-			# Add random number to avoid breaking cached HTML fragments that are 
+			# Add random number to avoid breaking cached HTML fragments that are
 			# later joined together on the one page (bug 16471)
 			$mapName = "ImageMap_" . ++self::$id . '_' . mt_rand( 0, 0x7fffffff );
 			$mapHTML = "<map name=\"$mapName\">\n$mapHTML</map>\n";
@@ -270,6 +281,7 @@ class ImageMap {
 		$anchor = $imageNode->parentNode;
 		$parent = $anchor->parentNode;
 		$div = $parent->insertBefore( new DOMElement( 'div' ), $anchor );
+		$div->setAttribute( 'class', 'noresize' );
 		if ( $defaultLinkAttribs ) {
 			$defaultAnchor = $div->appendChild( new DOMElement( 'a' ) );
 			foreach ( $defaultLinkAttribs as $name => $value ) {
@@ -311,18 +323,24 @@ class ImageMap {
 			}
 			$div->setAttribute( 'style', "height: {$thumbHeight}px; width: {$thumbWidth}px; " );
 			$descWrapper = $div->appendChild( new DOMElement( 'div' ) );
-			$descWrapper->setAttribute( 'style', 
-				"margin-left: {$marginLeft}px; " . 
-				"margin-top: {$marginTop}px; " .
-				"text-align: left;"
+			$descWrapper->setAttribute( 'style',
+				"margin-left: {$marginLeft}px; " .
+					"margin-top: {$marginTop}px; " .
+					"text-align: left;"
 			);
 
 			$descAnchor = $descWrapper->appendChild( new DOMElement( 'a' ) );
-			$descAnchor->setAttribute( 'href', $imageTitle->escapeLocalURL() );
-			$descAnchor->setAttribute( 'title', wfMsgForContent( 'imagemap_description' ) );
+			$descAnchor->setAttribute( 'href', $imageTitle->getLocalURL() );
+			$descAnchor->setAttribute(
+				'title',
+				wfMessage( 'imagemap_description' )->inContentLanguage()->text()
+			);
 			$descImg = $descAnchor->appendChild( new DOMElement( 'img' ) );
-			$descImg->setAttribute( 'alt', wfMsgForContent( 'imagemap_description' ) );
-			$descImg->setAttribute( 'src', "$wgScriptPath/extensions/ImageMap/desc-20.png" );
+			$descImg->setAttribute(
+				'alt',
+				wfMessage( 'imagemap_description' )->inContentLanguage()->text()
+			);
+			$descImg->setAttribute( 'src', "$wgExtensionAssetsPath/ImageMap/desc-20.png" );
 			$descImg->setAttribute( 'style', 'border: none;' );
 		}
 
@@ -333,9 +351,9 @@ class ImageMap {
 
 		# Register links
 		foreach ( $links as $title ) {
-			if( $title->isExternal() || $title->getNamespace() == NS_SPECIAL ) {
+			if ( $title->isExternal() || $title->getNamespace() == NS_SPECIAL ) {
 				// Don't register special or interwiki links...
-			} elseif( $title->getNamespace() == NS_MEDIA ) {
+			} elseif ( $title->getNamespace() == NS_MEDIA ) {
 				// Regular Media: links are recorded as image usages
 				$parser->mOutput->addImage( $title->getDBkey() );
 			} else {
@@ -353,6 +371,11 @@ class ImageMap {
 		return $output;
 	}
 
+	/**
+	 * @param $count int
+	 * @param $lineNum int|string
+	 * @return array|string
+	 */
 	static function tokenizeCoords( $count, $lineNum ) {
 		$coords = array();
 		for ( $i = 0; $i < $count; $i++ ) {
@@ -368,9 +391,12 @@ class ImageMap {
 		return $coords;
 	}
 
+	/**
+	 * @param $name string
+	 * @param $line string|int|bool
+	 * @return string
+	 */
 	static function error( $name, $line = false ) {
-		return '<p class="error">' . wfMsgForContent( $name, $line ) . '</p>';
+		return '<p class="error">' . wfMessage( $name, $line )->text() . '</p>';
 	}
 }
-
-
