@@ -1,26 +1,76 @@
 <?php
 /**
+ * Handler for DjVu images.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * http://www.gnu.org/copyleft/gpl.html
+ *
  * @file
  * @ingroup Media
  */
- 
+
 /**
+ * Handler for DjVu images
+ *
  * @ingroup Media
  */
 class DjVuHandler extends ImageHandler {
+	const EXPENSIVE_SIZE_LIMIT = 10485760; // 10MiB
+
+	/**
+	 * @return bool
+	 */
 	function isEnabled() {
 		global $wgDjvuRenderer, $wgDjvuDump, $wgDjvuToXML;
 		if ( !$wgDjvuRenderer || ( !$wgDjvuDump && !$wgDjvuToXML ) ) {
 			wfDebug( "DjVu is disabled, please set \$wgDjvuRenderer and \$wgDjvuDump\n" );
+
 			return false;
 		} else {
 			return true;
 		}
 	}
 
-	function mustRender() { return true; }
-	function isMultiPage() { return true; }
+	/**
+	 * @param File $file
+	 * @return bool
+	 */
+	function mustRender( $file ) {
+		return true;
+	}
 
+	/**
+	 * True if creating thumbnails from the file is large or otherwise resource-intensive.
+	 * @param File $file
+	 * @return bool
+	 */
+	public function isExpensiveToThumbnail( $file ) {
+		return $file->getSize() > static::EXPENSIVE_SIZE_LIMIT;
+	}
+
+	/**
+	 * @param File $file
+	 * @return bool
+	 */
+	function isMultiPage( $file ) {
+		return true;
+	}
+
+	/**
+	 * @return array
+	 */
 	function getParamMap() {
 		return array(
 			'img_width' => 'width',
@@ -28,7 +78,17 @@ class DjVuHandler extends ImageHandler {
 		);
 	}
 
+	/**
+	 * @param string $name
+	 * @param mixed $value
+	 * @return bool
+	 */
 	function validateParam( $name, $value ) {
+		if ( $name === 'page' && trim( $value ) !== (string)intval( $value ) ) {
+			// Extra junk on the end of page, probably actually a caption
+			// e.g. [[File:Foo.djvu|thumb|Page 3 of the document shows foo]]
+			return false;
+		}
 		if ( in_array( $name, array( 'width', 'height', 'page' ) ) ) {
 			if ( $value <= 0 ) {
 				return false;
@@ -40,14 +100,23 @@ class DjVuHandler extends ImageHandler {
 		}
 	}
 
+	/**
+	 * @param array $params
+	 * @return bool|string
+	 */
 	function makeParamString( $params ) {
 		$page = isset( $params['page'] ) ? $params['page'] : 1;
 		if ( !isset( $params['width'] ) ) {
 			return false;
 		}
+
 		return "page{$page}-{$params['width']}px";
 	}
 
+	/**
+	 * @param string $str
+	 * @return array|bool
+	 */
 	function parseParamString( $str ) {
 		$m = false;
 		if ( preg_match( '/^page(\d+)-(\d+)px$/', $str, $m ) ) {
@@ -57,6 +126,10 @@ class DjVuHandler extends ImageHandler {
 		}
 	}
 
+	/**
+	 * @param array $params
+	 * @return array
+	 */
 	function getScriptParams( $params ) {
 		return array(
 			'width' => $params['width'],
@@ -64,62 +137,107 @@ class DjVuHandler extends ImageHandler {
 		);
 	}
 
+	/**
+	 * @param File $image
+	 * @param string $dstPath
+	 * @param string $dstUrl
+	 * @param array $params
+	 * @param int $flags
+	 * @return MediaTransformError|ThumbnailImage|TransformParameterError
+	 */
 	function doTransform( $image, $dstPath, $dstUrl, $params, $flags = 0 ) {
 		global $wgDjvuRenderer, $wgDjvuPostProcessor;
-
-		// Fetch XML and check it, to give a more informative error message than the one which
-		// normaliseParams will inevitably give.
-		$xml = $image->getMetadata();
-		if ( !$xml ) {
-			return new MediaTransformError( 'thumbnail_error', @$params['width'], @$params['height'],
-				wfMsg( 'djvu_no_xml' ) );
-		}
 
 		if ( !$this->normaliseParams( $image, $params ) ) {
 			return new TransformParameterError( $params );
 		}
 		$width = $params['width'];
 		$height = $params['height'];
-		$srcPath = $image->getPath();
 		$page = $params['page'];
-		if ( $page > $this->pageCount( $image ) ) {
-			return new MediaTransformError( 'thumbnail_error', $width, $height, wfMsg( 'djvu_page_error' ) );
-		}
 
 		if ( $flags & self::TRANSFORM_LATER ) {
-			return new ThumbnailImage( $image, $dstUrl, $width, $height, $dstPath, $page );
+			$params = array(
+				'width' => $width,
+				'height' => $height,
+				'page' => $page
+			);
+
+			return new ThumbnailImage( $image, $dstUrl, $dstPath, $params );
 		}
 
-		if ( !wfMkdirParents( dirname( $dstPath ) ) ) {
-			return new MediaTransformError( 'thumbnail_error', $width, $height, wfMsg( 'thumbnail_dest_directory' ) );
+		if ( !wfMkdirParents( dirname( $dstPath ), null, __METHOD__ ) ) {
+			return new MediaTransformError(
+				'thumbnail_error',
+				$width,
+				$height,
+				wfMessage( 'thumbnail_dest_directory' )->text()
+			);
+		}
+
+		// Get local copy source for shell scripts
+		// Thumbnail extraction is very inefficient for large files.
+		// Provide a way to pool count limit the number of downloaders.
+		if ( $image->getSize() >= 1e7 ) { // 10MB
+			$work = new PoolCounterWorkViaCallback( 'GetLocalFileCopy', sha1( $image->getName() ),
+				array(
+					'doWork' => function () use ( $image ) {
+						return $image->getLocalRefPath();
+					}
+				)
+			);
+			$srcPath = $work->execute();
+		} else {
+			$srcPath = $image->getLocalRefPath();
+		}
+
+		if ( $srcPath === false ) { // Failed to get local copy
+			wfDebugLog( 'thumbnail',
+				sprintf( 'Thumbnail failed on %s: could not get local copy of "%s"',
+					wfHostname(), $image->getName() ) );
+
+			return new MediaTransformError( 'thumbnail_error',
+				$params['width'], $params['height'],
+				wfMessage( 'filemissing' )->text()
+			);
 		}
 
 		# Use a subshell (brackets) to aggregate stderr from both pipeline commands
 		# before redirecting it to the overall stdout. This works in both Linux and Windows XP.
-		$cmd = '(' . wfEscapeShellArg( $wgDjvuRenderer ) . " -format=ppm -page={$page} -size={$width}x{$height} " .
-			wfEscapeShellArg( $srcPath );
+		$cmd = '(' . wfEscapeShellArg(
+			$wgDjvuRenderer,
+			"-format=ppm",
+			"-page={$page}",
+			"-size={$params['physicalWidth']}x{$params['physicalHeight']}",
+			$srcPath );
 		if ( $wgDjvuPostProcessor ) {
 			$cmd .= " | {$wgDjvuPostProcessor}";
 		}
-		$cmd .= ' > ' . wfEscapeShellArg($dstPath) . ') 2>&1';
-		wfProfileIn( 'ddjvu' );
-		wfDebug( __METHOD__.": $cmd\n" );
+		$cmd .= ' > ' . wfEscapeShellArg( $dstPath ) . ') 2>&1';
+		wfDebug( __METHOD__ . ": $cmd\n" );
+		$retval = '';
 		$err = wfShellExec( $cmd, $retval );
-		wfProfileOut( 'ddjvu' );
 
 		$removed = $this->removeBadFile( $dstPath, $retval );
 		if ( $retval != 0 || $removed ) {
-			wfDebugLog( 'thumbnail',
-				sprintf( 'thumbnail failed on %s: error %d "%s" from "%s"',
-					wfHostname(), $retval, trim($err), $cmd ) );
+			$this->logErrorForExternalProcess( $retval, $err, $cmd );
 			return new MediaTransformError( 'thumbnail_error', $width, $height, $err );
 		} else {
-			return new ThumbnailImage( $image, $dstUrl, $width, $height, $dstPath, $page );
+			$params = array(
+				'width' => $width,
+				'height' => $height,
+				'page' => $page
+			);
+
+			return new ThumbnailImage( $image, $dstUrl, $dstPath, $params );
 		}
 	}
 
 	/**
 	 * Cache an instance of DjVuImage in an Image object, return that instance
+	 *
+	 * @param File $image
+	 * @param string $path
+	 * @return DjVuImage
 	 */
 	function getDjVuImage( $image, $path ) {
 		if ( !$image ) {
@@ -129,54 +247,124 @@ class DjVuHandler extends ImageHandler {
 		} else {
 			$deja = $image->dejaImage;
 		}
+
 		return $deja;
 	}
 
 	/**
-	 * Cache a document tree for the DjVu XML metadata
+	 * Get metadata, unserializing it if neccessary.
+	 *
+	 * @param File $file The DjVu file in question
+	 * @return string XML metadata as a string.
+	 * @throws MWException
 	 */
-	function getMetaTree( $image ) {
-		if ( isset( $image->dejaMetaTree ) ) {
+	private function getUnserializedMetadata( File $file ) {
+		$metadata = $file->getMetadata();
+		if ( substr( $metadata, 0, 3 ) === '<?xml' ) {
+			// Old style. Not serialized but instead just a raw string of XML.
+			return $metadata;
+		}
+
+		MediaWiki\suppressWarnings();
+		$unser = unserialize( $metadata );
+		MediaWiki\restoreWarnings();
+		if ( is_array( $unser ) ) {
+			if ( isset( $unser['error'] ) ) {
+				return false;
+			} elseif ( isset( $unser['xml'] ) ) {
+				return $unser['xml'];
+			} else {
+				// Should never ever reach here.
+				throw new MWException( "Error unserializing DjVu metadata." );
+			}
+		}
+
+		// unserialize failed. Guess it wasn't really serialized after all,
+		return $metadata;
+	}
+
+	/**
+	 * Cache a document tree for the DjVu XML metadata
+	 * @param File $image
+	 * @param bool $gettext DOCUMENT (Default: false)
+	 * @return bool|SimpleXMLElement
+	 */
+	function getMetaTree( $image, $gettext = false ) {
+		if ( $gettext && isset( $image->djvuTextTree ) ) {
+			return $image->djvuTextTree;
+		}
+		if ( !$gettext && isset( $image->dejaMetaTree ) ) {
 			return $image->dejaMetaTree;
 		}
 
-		$metadata = $image->getMetadata();
+		$metadata = $this->getUnserializedMetadata( $image );
 		if ( !$this->isMetadataValid( $image, $metadata ) ) {
 			wfDebug( "DjVu XML metadata is invalid or missing, should have been fixed in upgradeRow\n" );
+
 			return false;
 		}
-		wfProfileIn( __METHOD__ );
 
-		wfSuppressWarnings();
+		MediaWiki\suppressWarnings();
 		try {
-			$image->dejaMetaTree = new SimpleXMLElement( $metadata );
-		} catch( Exception $e ) {
-			wfDebug( "Bogus multipage XML metadata on '$image->name'\n" );
 			// Set to false rather than null to avoid further attempts
 			$image->dejaMetaTree = false;
+			$image->djvuTextTree = false;
+			$tree = new SimpleXMLElement( $metadata );
+			if ( $tree->getName() == 'mw-djvu' ) {
+				/** @var SimpleXMLElement $b */
+				foreach ( $tree->children() as $b ) {
+					if ( $b->getName() == 'DjVuTxt' ) {
+						// @todo File::djvuTextTree and File::dejaMetaTree are declared
+						// dynamically. Add a public File::$data to facilitate this?
+						$image->djvuTextTree = $b;
+					} elseif ( $b->getName() == 'DjVuXML' ) {
+						$image->dejaMetaTree = $b;
+					}
+				}
+			} else {
+				$image->dejaMetaTree = $tree;
+			}
+		} catch ( Exception $e ) {
+			wfDebug( "Bogus multipage XML metadata on '{$image->getName()}'\n" );
 		}
-		wfRestoreWarnings();
-		wfProfileOut( __METHOD__ );
-		return $image->dejaMetaTree;
+		MediaWiki\restoreWarnings();
+		if ( $gettext ) {
+			return $image->djvuTextTree;
+		} else {
+			return $image->dejaMetaTree;
+		}
 	}
 
+	/**
+	 * @param File $image
+	 * @param string $path
+	 * @return bool|array False on failure
+	 */
 	function getImageSize( $image, $path ) {
 		return $this->getDjVuImage( $image, $path )->getImageSize();
 	}
 
-	function getThumbType( $ext, $mime ) {
+	function getThumbType( $ext, $mime, $params = null ) {
 		global $wgDjvuOutputExtension;
 		static $mime;
 		if ( !isset( $mime ) ) {
 			$magic = MimeMagic::singleton();
 			$mime = $magic->guessTypesForExtension( $wgDjvuOutputExtension );
 		}
+
 		return array( $wgDjvuOutputExtension, $mime );
 	}
 
 	function getMetadata( $image, $path ) {
 		wfDebug( "Getting DjVu metadata for $path\n" );
-		return $this->getDjVuImage( $image, $path )->retrieveMetaData();
+
+		$xml = $this->getDjVuImage( $image, $path )->retrieveMetaData();
+		if ( $xml === false ) {
+			// Special value so that we don't repetitively try and decode a broken file.
+			return serialize( array( 'error' => 'Error extracting metadata' ) );
+		} else {
+			return serialize( array( 'xml' => $xml ) );
+		}
 	}
 
 	function getMetadataType( $image ) {
@@ -184,29 +372,77 @@ class DjVuHandler extends ImageHandler {
 	}
 
 	function isMetadataValid( $image, $metadata ) {
-		return !empty( $metadata ) && $metadata != serialize(array());
+		return !empty( $metadata ) && $metadata != serialize( array() );
 	}
 
 	function pageCount( $image ) {
-		$tree = $this->getMetaTree( $image );
-		if ( !$tree ) {
-			return false;
+		global $wgMemc;
+
+		$key = wfMemcKey( 'file-djvu', 'pageCount', $image->getSha1() );
+
+		$count = $wgMemc->get( $key );
+		if ( $count === false ) {
+			$tree = $this->getMetaTree( $image );
+			if ( !$tree ) {
+				return false;
+			}
+			$count = count( $tree->xpath( '//OBJECT' ) );
+			$wgMemc->set( $key, $count );
 		}
-		return count( $tree->xpath( '//OBJECT' ) );
+
+		return $count;
 	}
 
 	function getPageDimensions( $image, $page ) {
-		$tree = $this->getMetaTree( $image );
+		global $wgMemc;
+
+		$key = wfMemcKey( 'file-djvu', 'dimensions', $image->getSha1() );
+
+		$dimsByPage = $wgMemc->get( $key );
+		if ( !is_array( $dimsByPage ) ) {
+			$tree = $this->getMetaTree( $image );
+			if ( !$tree ) {
+				return false;
+			}
+
+			$dimsByPage = array();
+			$count = count( $tree->xpath( '//OBJECT' ) );
+			for ( $i = 0; $i < $count; ++$i ) {
+				$o = $tree->BODY[0]->OBJECT[$i];
+				if ( $o ) {
+					$dimsByPage[$i] = array(
+						'width' => (int)$o['width'],
+						'height' => (int)$o['height']
+					);
+				} else {
+					$dimsByPage[$i] = false;
+				}
+			}
+
+			$wgMemc->set( $key, $dimsByPage );
+		}
+
+		$index = $page - 1; // MW starts pages at 1
+
+		return isset( $dimsByPage[$index] ) ? $dimsByPage[$index] : false;
+	}
+
+	/**
+	 * @param File $image
+	 * @param int $page Page number to get information for
+	 * @return bool|string Page text or false when no text found.
+	 */
+	function getPageText( $image, $page ) {
+		$tree = $this->getMetaTree( $image, true );
 		if ( !$tree ) {
 			return false;
 		}
 
-		$o = $tree->BODY[0]->OBJECT[$page-1];
+		$o = $tree->BODY[0]->PAGE[$page - 1];
 		if ( $o ) {
-			return array(
-				'width' => intval( $o['width'] ),
-				'height' => intval( $o['height'] )
-			);
+			$txt = $o['value'];
+
+			return $txt;
 		} else {
 			return false;
 		}

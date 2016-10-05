@@ -112,7 +112,8 @@ $wgSecretKey = "";
 
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
-$wgDefaultSkin = 'miejet';
+wfLoadSkin('Vector');
+$wgDefaultSkin = 'vector';
 $wgAllowUserSkin = false;
 
 ## For attaching licensing metadata to pages, and displaying an
@@ -140,13 +141,13 @@ $oldtz = getenv("TZ");
 putenv("TZ=$wgLocaltimezone");
 
 // EditTools
-require_once("$IP/extensions/CharInsert.php");
+//require_once("$IP/extensions/CharInsert.php");
 
 // ImageMap
-require_once("$IP/extensions/ImageMap/ImageMap.php");
+//require_once("$IP/extensions/ImageMap/ImageMap.php");
 
 // NoTitle
-require_once("$IP/extensions/notitle.php");
+//require_once("$IP/extensions/notitle.php");
 
 
 // Lock down wiki so that only registered users can perform actions
