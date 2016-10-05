@@ -23,6 +23,7 @@ $path = array( $IP, "$IP/includes", "$IP/languages" );
 set_include_path( implode( PATH_SEPARATOR, $path ) . PATH_SEPARATOR . get_include_path() );
 
 require_once( "$IP/includes/DefaultSettings.php" );
+require_once( "$IP/../../conf/db.php" );
 
 # If PHP's memory limit is very low, some operations may fail.
 # ini_set( 'memory_limit', '20M' );
@@ -36,7 +37,7 @@ if ( $wgCommandLineMode ) {
 # $wgDisableOutputCompression = true;
 
 $wgSitename         = "Mie Guidebook";
-$wgLogo             = 'http://www.miejets.org/gb/miekanji.png';
+$wgLogo             = 'http://www.mieguidebook.org/gb/miekanji.png';
 
 ## The URL base path to the directory containing the wiki;
 ## defaults for all runtime URL paths are based off of this.
