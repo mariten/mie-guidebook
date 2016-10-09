@@ -110,6 +110,7 @@ $wgLocalInterwiki   = strtolower( $wgSitename );
 $wgLanguageCode = "en";
 
 $wgSecretKey = "";
+$wgTmpDirectory = "$IP/../../tmp";
 
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
