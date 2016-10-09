@@ -148,7 +148,7 @@ putenv("TZ=$wgLocaltimezone");
 require_once("$IP/extensions/ImageMap/ImageMap.php");
 
 // NoTitle
-//require_once("$IP/extensions/notitle.php");
+require_once("$IP/extensions/NoTitle/NoTitle.php");
 
 
 // Lock down wiki so that only registered users can perform actions
