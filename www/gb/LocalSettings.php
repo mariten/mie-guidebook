@@ -142,7 +142,7 @@ $oldtz = getenv("TZ");
 putenv("TZ=$wgLocaltimezone");
 
 // EditTools
-//require_once("$IP/extensions/CharInsert.php");
+require_once("$IP/extensions/CharInsert/CharInsert.php");
 
 // ImageMap
 require_once("$IP/extensions/ImageMap/ImageMap.php");
