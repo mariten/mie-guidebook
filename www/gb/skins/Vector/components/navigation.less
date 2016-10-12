@@ -12,12 +12,7 @@
 /* Head */
 #mw-page-base {
 	height: 5em;
-	background-position: bottom left;
-	background-repeat: repeat-x;
-	/* This image is only a fallback (for IE 6-9), so we do not @embed it. */
-	background-image: url('images/page-fade.png');
-	.vertical-gradient(@body-background-color, @menu-background-color, 50%, 100%);
-	background-color: @body-background-color;
+	background-color: @menu-background-color;
 }
 
 #mw-head-base {
@@ -61,7 +56,7 @@ div#mw-head {
 /* Logo */
 #p-logo {
 	position: absolute;
-	top: -160px;
+	top: -155px;
 	left: 0;
 	width: 10em;
 	height: 160px;
@@ -81,22 +76,18 @@ div#mw-panel {
 	font-size: @menu-main-font-size;
 	position: absolute;
 	top: 160px;
-	padding-top: 1em;
 	width: 10em;
 	left: 0;
 
 	div.portal {
-		margin: 0 0.6em 0 0.7em;
+		margin: 0 0.3em 0 0.3em;
 		padding: 0.25em 0;
 		direction: ltr;
-		background-position: top left;
-		background-repeat: no-repeat;
-		.background-image('images/portal-break.png');
 
 		h3 {
 			font-size: @menu-main-heading-font-size;
 			color: @menu-main-heading-color;
-			font-weight: normal;
+			font-weight: bold;
 			margin: 0;
 			padding: @menu-main-heading-padding;
 			cursor: default;
@@ -130,16 +121,24 @@ div#mw-panel {
 			}
 		}
 	}
+}
 
-	/* First sidebar portlet. Not using :first-of-type for IE<=8 support. */
-	#p-logo + div.portal {
-		background-image: none;
-		margin-top: 0;
-		h3 {
-			display: none;
-		}
-		div.body {
-			margin-left: 0.5em;
-		}
-	}
+#p-Mie_Guidebook
+{
+    h3 {
+        font-size: 1.20em                   !important;
+    }
+    div.body {
+        margin: 0                           !important;
+        padding: 0.2em                      !important;
+        border: 1px solid gray              !important;
+        background-color: #fff              !important;
+        font-size: 1.10em                   !important;
+        font-weight: bold                   !important;
+        ul {
+            margin: 0 0 0 0.3em             !important;
+            list-style-type: disc           !important;
+            list-style-position: inside     !important;
+        }
+    }
 }

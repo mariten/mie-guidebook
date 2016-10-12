@@ -11,7 +11,7 @@ div.vectorTabs h3 {
 div.vectorTabs {
 	/* @noflip */
 	float: left;
-	height: 2.5em;
+	height: 2.4em;
 	.background-image('images/tab-break.png');
 	background-position: bottom left;
 	background-repeat: no-repeat;
@@ -38,10 +38,7 @@ div.vectorTabs {
 			height: 100%;
 			margin: 0;
 			padding: 0;
-			background-color: #f3f3f3;
-			.background-image('images/tab-normal-fade.png');
-			background-position: bottom left;
-			background-repeat: repeat-x;
+			background-color: #e6e6e3;
 			white-space: nowrap;
 		}
 
@@ -60,7 +57,8 @@ div.vectorTabs {
 		}
 
 		&.selected {
-			.background-image('images/tab-current-fade.png');
+			background-color: @body-background-color;
+			border-bottom: 3px solid @body-background-color;
 			a,
 			a:visited{
 				color: #333;
@@ -134,8 +132,9 @@ div#mw-head div.vectorMenu h3 {
 	.background-image('images/tab-break.png');
 	background-repeat: no-repeat;
 	background-position: bottom right;
+	background-color: #e6e6e3;
 	font-size: 1em;
-	height: 2.5em;
+	height: 2.4em;
 	// This effectively moves the "background border" outside of the element to act like a real
 	// border. It is necessary for the dropdown (div.vectorMenu div.menu) to align well.
 	padding-right: 1px;
