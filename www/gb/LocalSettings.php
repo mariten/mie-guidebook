@@ -114,6 +114,7 @@ $wgLanguageCode = "en";
 
 $wgSecretKey = "";
 
+
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
 wfLoadSkin('Vector');
@@ -135,6 +136,7 @@ $wgDiff3 = "/usr/bin/diff3";
 # When you make changes to this configuration file, this will make
 # sure that cached pages are cleared.
 $wgCacheEpoch = max( $wgCacheEpoch, gmdate( 'YmdHis', @filemtime( __FILE__ ) ) );
+//$wgCacheEpoch = gmdate('YmdHis');       # Completely invalidates all cache - useful for dev mode
 
 # No need for patrolled edits
 $wgUseRCPatrol = false;
