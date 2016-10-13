@@ -46,6 +46,9 @@ $wgLogo             = 'http://www.mieguidebook.org/gb/mie150.png';
 $wgScriptPath       = "/gb";
 $wgScriptExtension  = ".php";
 
+$wgTmpDirectory         = "$IP/../../tmp";
+$wgFileCacheDirectory   = $wgTmpDirectory;
+
 // Use Clean URLs
 $wgUsePathInfo      = true;
 $wgArticlePath      = '/wiki/$1';
@@ -110,7 +113,6 @@ $wgLocalInterwiki   = strtolower( $wgSitename );
 $wgLanguageCode = "en";
 
 $wgSecretKey = "";
-$wgTmpDirectory = "$IP/../../tmp";
 
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
