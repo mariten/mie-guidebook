@@ -57,6 +57,16 @@ h6 {
 	border-bottom: none;
 }
 
+h1 {
+	margin: 0;
+	padding: 0.2em 0 0.4em 0;
+	font-weight: bold;
+}
+
+h1, h2 {
+	font-family: "Linux Libertine", Georgia, Times, serif;
+}
+
 .clearer {
 	clear: both;
 }
@@ -97,6 +107,7 @@ h6 {
 .mainentry h4 {
 	color: #222;
 	font-size: 13px;
+	font-weight: bold;
 	margin-top: 10px;
 	text-shadow: #f9f9f9 -1px -1px 0;
 }

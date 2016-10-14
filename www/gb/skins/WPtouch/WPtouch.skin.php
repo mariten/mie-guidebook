@@ -105,7 +105,7 @@ class WPtouchTemplate extends BaseTemplate {
 <noscript>
 <div id="noscript-wrap">
 	<div id="noscript">
-		<h2><?php $this->msg( 'wptouch-noscript-title' ) ?></h2>
+		<h1><?php $this->msg( 'wptouch-noscript-title' ) ?></h1>
 		<?php echo $this->getMsg( 'wptouch-noscript-body' )->parseAsBlock() ?>
 	</div>
 </div>
@@ -205,7 +205,7 @@ class WPtouchTemplate extends BaseTemplate {
 
 <div class="content">
 	<div class="post">
-		<h2><?php $this->data['displaytitle'] != '' ? $this->html( 'title' ) : $this->text( 'title' ) ?></h2>
+		<h1><?php $this->data['displaytitle'] != '' ? $this->html( 'title' ) : $this->text( 'title' ) ?></h1>
 		<hr />
 		<div class="clearer"></div>
 		<div class="mainentry mw-body">
