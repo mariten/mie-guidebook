@@ -521,3 +521,30 @@ table.wikitable, table.TablePager {
 	font-weight: bold;
 	padding: 0.3em;
 }
+
+/* Image thumbnails */
+.thumb {
+	width: 100% !important;
+	margin: 0 !important;
+}
+
+div.thumbinner { /* need to specify div so it can overwrite the CSS in commonContent.css */
+	width: auto !important;
+	padding: 0.75em 0 !important;
+	margin-bottom: 0.5em;
+}
+
+.thumbinner img {
+	width: 50%;
+	height: auto;
+	border: 0 !important;
+}
+
+.thumbcaption {
+	text-align: center !important;
+	margin-bottom: -.75em !important;
+}
+
+.magnify {
+	display: none;
+}
