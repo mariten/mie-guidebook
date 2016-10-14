@@ -118,8 +118,18 @@ $wgSecretKey = "";
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
 wfLoadSkin('Vector');
-$wgDefaultSkin = 'vector';
+wfLoadSkin('WPtouch');
 $wgAllowUserSkin = false;
+
+## Default skin: you can change the default skin.
+## Use the internal symbolic names, ie 'vector', 'monobook':
+if (preg_match("/(mobile|webos|opera mini)/i", $_SERVER['HTTP_USER_AGENT'])) {
+    $wgDefaultSkin = 'wptouch';
+    //$wgDefaultSkin = 'refreshed';
+} else {
+    $wgDefaultSkin = 'vector';
+}
+
 
 ## For attaching licensing metadata to pages, and displaying an
 ## appropriate copyright notice / icon. GNU Free Documentation
