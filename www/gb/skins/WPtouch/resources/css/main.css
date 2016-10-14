@@ -50,14 +50,12 @@ blockquote {
 
 /* ashley 16 June 2015: override /resources/src/mediawiki.skinning/elements.css */
 h1,
-h2,
 h3,
 h4,
 h5,
 h6 {
 	border-bottom: none;
 }
-
 
 .clearer {
 	clear: both;
@@ -73,7 +71,7 @@ h6 {
 	line-height: 145%;
 }
 .mainentry p {
-	margin: 2% 0 1%;
+	margin: 0.2em 0 0.8em 0;
 	padding: 0;
 }
 .mainentry h1 {
@@ -82,7 +80,8 @@ h6 {
 .mainentry h2 {
 	color: #222;
 	font-size: 15px;
-	margin-bottom: 10px;
+	margin-top: 10px;
+	margin-bottom: 5px;
 	text-align: left;
 	text-shadow: #f9f9f9 -1px -1px 0;
 }
@@ -91,25 +90,34 @@ h6 {
 	font-size: 14px;
 	font-weight: bold;
 	line-height: 14px;
-	margin-bottom: 10px;
+	margin-top: 10px;
 	text-align: left;
 	text-shadow: #fff -1px 1px 0;
 }
 .mainentry h4 {
 	color: #222;
 	font-size: 13px;
-	margin-bottom: 10px;
+	margin-top: 10px;
 	text-shadow: #f9f9f9 -1px -1px 0;
 }
 .mainentry h5 {
 	font-size: 12px;
-	margin-bottom: 10px;
+	margin-top: 10px;
 	text-shadow: #f9f9f9 -1px -1px 0;
 }
 .mainentry img {
 	height: auto;
 	max-width: 100%;
 }
+.mainentry dl {
+	margin-top: 0;
+	margin-bottom: 0.1em;
+}
+.mainentry dd {
+	margin-bottom: 0.8em;
+	line-height: 1.5em;
+}
+
 #headerbar {
 	background-position: 0 0;
 	background-repeat: repeat-x;
