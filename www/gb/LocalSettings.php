@@ -112,7 +112,7 @@ $wgLocalInterwiki   = strtolower( $wgSitename );
 
 $wgLanguageCode = "en";
 
-$wgSecretKey = "";
+$wgSecretKey = MIEGB_KEY_WG_SECRET;
 
 
 ## Default skin: you can change the default skin. Use the internal symbolic
