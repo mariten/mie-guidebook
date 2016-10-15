@@ -23,7 +23,7 @@ $path = array( $IP, "$IP/includes", "$IP/languages" );
 set_include_path( implode( PATH_SEPARATOR, $path ) . PATH_SEPARATOR . get_include_path() );
 
 require_once( "$IP/includes/DefaultSettings.php" );
-require_once( "$IP/../../conf/db.php" );
+require_once( "$IP/../../conf/secrets.php" );
 
 # If PHP's memory limit is very low, some operations may fail.
 # ini_set( 'memory_limit', '20M' );
