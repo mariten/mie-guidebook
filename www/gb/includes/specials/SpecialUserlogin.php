@@ -169,6 +169,7 @@ class LoginForm extends SpecialPage {
 		$this->mUsername = $request->getText( 'wpName' );
 		$this->mPassword = $request->getText( 'wpPassword' );
 		$this->mRetype = $request->getText( 'wpRetype' );
+		$this->mCheckNingen = $request->getText( 'wpCheckNingen' );
 		$this->mDomain = $request->getText( 'wpDomain' );
 		$this->mReason = $request->getText( 'wpReason' );
 		$this->mCookieCheck = $request->getVal( 'wpCookieCheck' );
@@ -567,6 +568,11 @@ class LoginForm extends SpecialPage {
 			return Status::newFatal( 'usernameinprogress' );
 		} elseif ( $u->idForName( User::READ_LOCKING ) ) {
 			return Status::newFatal( 'userexists' );
+		}
+
+		# Make sure user passes the Turing Test
+		if ( strtolower($this->mCheckNingen) !== MIEGB_ACCOUNT_CREATION_CHECK ) {
+			return Status::newFatal( 'nothuman' );
 		}
 
 		if ( $this->mCreateaccountMail ) {

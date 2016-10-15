@@ -178,6 +178,16 @@ class UsercreateTemplate extends BaseTemplate {
 				<?php } ?>
 			</div>
 
+			<div class="mw-ui-vform-field">
+				<label for='wpCheckNingen'>What is the Capital City of Mie Prefecture?</label>
+				<input type='text' class='mw-ui-input loginText' name="wpCheckNingen" id="wpCheckNingen"
+					tabindex="7"
+					value="" size='20' />
+				<div class="prefsectiontip">
+					<b>The answer is 3 letters long</b>, you can type it in as either upper or lower case.  This field is required to ensure you are human.
+				</div>
+			</div>
+
 			<?php if ( $this->data['userealname'] ) { ?>
 				<div class="mw-ui-vform-field">
 					<label for='wpRealName'><?php $this->msg( 'createacct-realname' ); ?></label>

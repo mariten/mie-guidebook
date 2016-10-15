@@ -7,3 +7,6 @@ define('MIEGB_DB_PASS', '');
 
 // Secret Keys
 define('MIEGB_KEY_WG_SECRET',   '');
+
+// Account creation captcha
+define('MIEGB_ACCOUNT_CREATION_CHECK',  '');
