@@ -23,7 +23,10 @@ $path = array( $IP, "$IP/includes", "$IP/languages" );
 set_include_path( implode( PATH_SEPARATOR, $path ) . PATH_SEPARATOR . get_include_path() );
 
 require_once( "$IP/includes/DefaultSettings.php" );
+
+// Mie Guidebook specific configuration
 require_once( "$IP/../../conf/secrets.php" );
+require_once( "$IP/../../conf/environment.php" );
 
 # If PHP's memory limit is very low, some operations may fail.
 # ini_set( 'memory_limit', '20M' );
@@ -142,10 +145,17 @@ $wgRightsIcon = "";
 
 $wgDiff3 = "/usr/bin/diff3";
 
-# When you make changes to this configuration file, this will make
-# sure that cached pages are cleared.
-$wgCacheEpoch = max( $wgCacheEpoch, gmdate( 'YmdHis', @filemtime( __FILE__ ) ) );
-//$wgCacheEpoch = gmdate('YmdHis');       # Completely invalidates all cache - useful for dev mode
+# Cache settings
+if (MIEGB_IS_DEV_ENV) {
+    # Completely invalidates all cache - useful for dev mode
+    $wgCacheEpoch = gmdate('YmdHis');
+    $wgMessageCacheType = CACHE_NONE;
+    $wgParserCacheType = CACHE_NONE;
+    $wgSessionCacheType = CACHE_NONE;
+} else {
+    # When you make changes to this configuration file, this will make sure that cached pages are cleared
+    $wgCacheEpoch = max( $wgCacheEpoch, gmdate( 'YmdHis', @filemtime( __FILE__ ) ) );
+}
 
 # No need for patrolled edits
 $wgUseRCPatrol = false;
