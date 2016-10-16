@@ -166,6 +166,8 @@ require_once("$IP/extensions/NoTitle/NoTitle.php");
 
 
 // Lock down wiki so that only registered users can perform actions
+// Also disable any API-based write functionality
 $wgGroupPermissions['*']['edit'] = false;
 $wgDisableAnonTalk = false;
 $wgShowIPinHeader = false;
+$wgEnableWriteAPI = false;
