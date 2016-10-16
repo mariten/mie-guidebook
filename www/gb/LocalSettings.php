@@ -125,7 +125,6 @@ $wgAllowUserSkin = false;
 ## Use the internal symbolic names, ie 'vector', 'monobook':
 if (preg_match("/(mobile|webos|opera mini)/i", $_SERVER['HTTP_USER_AGENT'])) {
     $wgDefaultSkin = 'wptouch';
-    //$wgDefaultSkin = 'refreshed';
 } else {
     $wgDefaultSkin = 'vector';
 }
