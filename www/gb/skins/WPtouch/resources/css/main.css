@@ -553,3 +553,7 @@ div.thumbinner { /* need to specify div so it can overwrite the CSS in commonCon
 .magnify {
 	display: none;
 }
+
+.hide-on-mobile {
+	display: none;
+}
