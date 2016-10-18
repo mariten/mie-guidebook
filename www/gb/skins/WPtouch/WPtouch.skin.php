@@ -205,7 +205,7 @@ class WPtouchTemplate extends BaseTemplate {
 
 <div class="content">
 	<div class="post">
-		<h1><?php $this->data['displaytitle'] != '' ? $this->html( 'title' ) : $this->text( 'title' ) ?></h1>
+		<h1 class="firstHeading"><?php $this->data['displaytitle'] != '' ? $this->html( 'title' ) : $this->text( 'title' ) ?></h1>
 		<hr />
 		<div class="clearer"></div>
 		<div class="mainentry mw-body">
