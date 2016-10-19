@@ -47,7 +47,7 @@ class SkinWPtouch extends SkinTemplate {
 		$out->addMeta( 'viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' );
 		$out->addLink( array(
 			'rel' => 'apple-touch-icon',
-			'href' => $wgLocalStylePath . '/WPtouch/resources/images/favicon.png'
+			'href' => $wgLocalStylePath . '/WPtouch/resources/images/mie32.png'
 		) );
 
 		$out->addModules( 'skins.wptouch.js' );
@@ -78,7 +78,7 @@ class WPtouchTemplate extends BaseTemplate {
 		if ( is_object( $logoIcon ) ) {
 			$logoURL = $logoIcon->getUrl();
 		} else {
-			$logoURL = $wgStylePath . '/WPtouch/resources/images/favicon.png';
+			$logoURL = $wgStylePath . '/WPtouch/resources/images/mie32.png';
 		}
 
 		// Login stuff borrowed from the UserLoginBox extension
