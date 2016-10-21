@@ -1,3 +1,26 @@
+v2.0.0 :: Oct 20 2016
+======================
+* Migrated to `mieguidebook.org`
+    * To preserve high SEO status of articles, create permanent 301 redirector on original Guidebook to `mieguidebook.org`
+* Support clean URLs in wiki articles
+* Upgrade to **MediaWiki 1.26** as well as supported plug-ins
+    * Switch interface over to new MediaWiki-standard **Vector** skin
+    * Perform same CSS color and style changes that were made to "Monobook" skin on the original Mie Guidebook
+    * Adjust margins and appearance of the left-hand nav menu appropriately
+* Added a mobile skin, which triggers when the user-agent is iOS or Android
+    * Use the **WPtouch** skin for MediaWiki
+* As part of migration away from `miejets.org`, de-affiliate the Guidebook with the JET Program
+    * Use the Mie-in-a-circle design (originally from Mie Life Magazine) as the Guidebook icon
+        * The old JETs-waving-Japanese-flag design no longer makes sense since site is no longer affiliate with JET
+    * Remove content from the site related to the MieJETs forum or that is inherently tied to the JET Program
+        * Remove any direct links to other `miejets.org` sites
+        * Remove "JET Links" from the main page and other primary areas like the left-hand navbar
+        * Create a new catch-all page for JET-specific content, but no need to include in prominent places like navbar
+* Store database credentials in seperate file, not under the WWW root
+* Added captcha to account creation screen that requires potential new users to answer a question about Mie Prefecture
+    * This same question and mechanism was present on the old MieJETs forum, so mimic it on the new stand-alone Guidebook
+
+
 v1.0.0 :: Jul 13 2010
 ======================
 * Downloaded, installed, and configured **MediaWiki 1.15** to power the Mie Guidebook
