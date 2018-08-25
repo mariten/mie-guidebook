@@ -1,3 +1,10 @@
+v2.0.1 :: Aug 25 2018
+======================
+* Updated login screen to no longer include instructions for former MieJETs.org users
+* Added some minor security fixes
+* Added partner link to KobeJET.com
+* Fixed bug related to `CREDITS` file not existing
+
 v2.0.0 :: Oct 20 2016
 ======================
 * Migrated to `mieguidebook.org`
